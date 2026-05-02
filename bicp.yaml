@@ -1,0 +1,35 @@
+port: 7890
+socks-port: 7891
+allow-lan: true
+mode: rule
+log-level: info
+
+proxies:
+  - name: DMIT-AI
+    type: ss
+    server: bicp.duckdns.org
+    port: 8388
+    cipher: aes-128-gcm
+    password: BICP@2026
+    udp: true
+
+proxy-groups:
+  - name: AI
+    type: select
+    proxies:
+      - DMIT-AI
+      - DIRECT
+
+rules:
+  - DOMAIN-SUFFIX,baidu.com,DIRECT
+  - DOMAIN-SUFFIX,qq.com,DIRECT
+  - DOMAIN-SUFFIX,bilibili.com,DIRECT
+  - DOMAIN-SUFFIX,taobao.com,DIRECT
+
+  - DOMAIN-SUFFIX,openai.com,DMIT-AI
+  - DOMAIN-SUFFIX,chatgpt.com,DMIT-AI
+  - DOMAIN-SUFFIX,anthropic.com,DMIT-AI
+  - DOMAIN-SUFFIX,claude.ai,DMIT-AI
+  - DOMAIN-SUFFIX,perplexity.ai,DMIT-AI
+
+  - MATCH,DIRECT
