@@ -4,11 +4,10 @@ mode: rule
 log-level: info
 ipv6: false
 
-# ===== DNS（避免污染/泄漏）=====
 dns:
   enable: true
-  listen: 0.0.0.0:53
-  enhanced-mode: fake-ip
+  listen: 0.0.0.0:1053
+  enhanced-mode: redir-host
   nameserver:
     - 223.5.5.5
     - 119.29.29.29
@@ -17,10 +16,8 @@ dns:
     - 8.8.8.8
   fallback-filter:
     geoip: true
-    ipcidr:
-      - 240.0.0.0/4
+    geoip-code: CN
 
-# ===== 节点 =====
 proxies:
   - name: DMIT-AI
     type: ss
@@ -30,7 +27,6 @@ proxies:
     password: BICP@2026
     udp: true
 
-# ===== 策略组 =====
 proxy-groups:
   - name: PROXY
     type: select
@@ -38,50 +34,85 @@ proxy-groups:
       - DMIT-AI
       - DIRECT
 
-# ===== 规则（核心）=====
 rules:
-
-  # ===== 本地/内网 =====
+  # 本地/内网直连
   - DOMAIN-SUFFIX,local,DIRECT
   - IP-CIDR,192.168.0.0/16,DIRECT
   - IP-CIDR,10.0.0.0/8,DIRECT
   - IP-CIDR,172.16.0.0/12,DIRECT
+  - IP-CIDR,127.0.0.0/8,DIRECT
 
-  # ===== AI（强制走代理）=====
-  - DOMAIN-KEYWORD,openai,PROXY
-  - DOMAIN-KEYWORD,chatgpt,PROXY
-  - DOMAIN-KEYWORD,anthropic,PROXY
-  - DOMAIN-KEYWORD,claude,PROXY
-  - DOMAIN-KEYWORD,perplexity,PROXY
-  - DOMAIN-KEYWORD,poe,PROXY
+  # 国内常用网站直连
+  - DOMAIN-SUFFIX,baidu.com,DIRECT
+  - DOMAIN-SUFFIX,bdstatic.com,DIRECT
+  - DOMAIN-SUFFIX,qq.com,DIRECT
+  - DOMAIN-SUFFIX,weixin.qq.com,DIRECT
+  - DOMAIN-SUFFIX,taobao.com,DIRECT
+  - DOMAIN-SUFFIX,tmall.com,DIRECT
+  - DOMAIN-SUFFIX,jd.com,DIRECT
+  - DOMAIN-SUFFIX,zhihu.com,DIRECT
+  - DOMAIN-SUFFIX,bilibili.com,DIRECT
+  - DOMAIN-SUFFIX,douyin.com,DIRECT
+  - DOMAIN-SUFFIX,bytedance.com,DIRECT
+  - DOMAIN-SUFFIX,alicdn.com,DIRECT
 
-  # ===== Google / Gemini =====
-  - DOMAIN-KEYWORD,google,PROXY
-  - DOMAIN-SUFFIX,gstatic.com,PROXY
+  # AI 平台
+  - DOMAIN-SUFFIX,openai.com,PROXY
+  - DOMAIN-SUFFIX,chatgpt.com,PROXY
+  - DOMAIN-SUFFIX,oaistatic.com,PROXY
+  - DOMAIN-SUFFIX,oaiusercontent.com,PROXY
+  - DOMAIN-SUFFIX,anthropic.com,PROXY
+  - DOMAIN-SUFFIX,claude.ai,PROXY
+  - DOMAIN-SUFFIX,perplexity.ai,PROXY
+  - DOMAIN-SUFFIX,poe.com,PROXY
+
+  # Google / Gemini
+  - DOMAIN-SUFFIX,google.com,PROXY
   - DOMAIN-SUFFIX,googleapis.com,PROXY
+  - DOMAIN-SUFFIX,gstatic.com,PROXY
+  - DOMAIN-SUFFIX,googleusercontent.com,PROXY
+  - DOMAIN-SUFFIX,gemini.google.com,PROXY
 
-  # ===== GitHub / 开发 =====
-  - DOMAIN-KEYWORD,github,PROXY
+  # GitHub
+  - DOMAIN-SUFFIX,github.com,PROXY
   - DOMAIN-SUFFIX,githubusercontent.com,PROXY
+  - DOMAIN-SUFFIX,githubassets.com,PROXY
+  - DOMAIN-SUFFIX,raw.githubusercontent.com,PROXY
 
-  # ===== Microsoft / Office =====
-  - DOMAIN-KEYWORD,microsoft,PROXY
-  - DOMAIN-SUFFIX,office.com,PROXY
-
-  # ===== Apple（账号走代理，CDN直连）=====
+  # Apple 美国账号/开发者
   - DOMAIN-SUFFIX,appleid.apple.com,PROXY
   - DOMAIN-SUFFIX,developer.apple.com,PROXY
-  - DOMAIN-SUFFIX,apple.com,PROXY
+  - DOMAIN-SUFFIX,apps.apple.com,PROXY
+  - DOMAIN-SUFFIX,itunes.apple.com,PROXY
+  - DOMAIN-SUFFIX,icloud.com,PROXY
   - DOMAIN-SUFFIX,cdn-apple.com,DIRECT
   - DOMAIN-SUFFIX,appleusercontent.com,DIRECT
 
-  # ===== 常见海外服务 =====
-  - DOMAIN-KEYWORD,amazon,PROXY
-  - DOMAIN-KEYWORD,cloudflare,PROXY
-  - DOMAIN-KEYWORD,docker,PROXY
+  # 常用美国/海外服务
+  - DOMAIN-SUFFIX,microsoft.com,PROXY
+  - DOMAIN-SUFFIX,office.com,PROXY
+  - DOMAIN-SUFFIX,outlook.com,PROXY
+  - DOMAIN-SUFFIX,live.com,PROXY
+  - DOMAIN-SUFFIX,amazon.com,PROXY
+  - DOMAIN-SUFFIX,amazonaws.com,PROXY
+  - DOMAIN-SUFFIX,cloudflare.com,PROXY
+  - DOMAIN-SUFFIX,docker.com,PROXY
+  - DOMAIN-SUFFIX,docker.io,PROXY
+  - DOMAIN-SUFFIX,notion.so,PROXY
+  - DOMAIN-SUFFIX,figma.com,PROXY
+  - DOMAIN-SUFFIX,slack.com,PROXY
+  - DOMAIN-SUFFIX,discord.com,PROXY
+  - DOMAIN-SUFFIX,zoom.us,PROXY
+  - DOMAIN-SUFFIX,reddit.com,PROXY
+  - DOMAIN-SUFFIX,x.com,PROXY
+  - DOMAIN-SUFFIX,twitter.com,PROXY
+  - DOMAIN-SUFFIX,linkedin.com,PROXY
+  - DOMAIN-SUFFIX,youtube.com,PROXY
+  - DOMAIN-SUFFIX,ytimg.com,PROXY
+  - DOMAIN-SUFFIX,netflix.com,PROXY
 
-  # ===== 中国大陆直连（关键核心）=====
+  # 中国 IP 直连
   - GEOIP,CN,DIRECT
 
-  # ===== 兜底 =====
-  - MATCH,PROXY
+  # 兜底：全部直连，避免百度等国内网站误走美国
+  - MATCH,DIRECT
