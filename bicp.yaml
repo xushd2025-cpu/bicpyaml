@@ -24,7 +24,7 @@ proxies:
     server: bicp.duckdns.org
     port: 8388
     cipher: aes-128-gcm
-    password: BICP@2026
+    password: BICP@2027
     udp: true
 
 proxy-groups:
